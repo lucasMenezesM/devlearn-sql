@@ -21,11 +21,11 @@ create table usuario (
 create table curso (
 	id_curso int auto_increment primary key,
     titulo varchar(255) not null,
-    descricao text,
+    descricao varchar(255),
     -- id_usuario int,
     data_criacao datetime default current_timestamp,
     publicado boolean default false,
-    inativo boolean default false,
+    inativo boolean default false
     -- foreign key (id_usuario) references usuario(id_usuario)
 );
     
@@ -67,7 +67,7 @@ create table atividade (
     publicado boolean default true,
     tipo_atividade ENUM('Multipla escolha', 'Discursiva'),
     foreign key (id_modulo) references modulo(id_modulo) ON DELETE SET NULL,
-    foreign key (id_aula) references aula(aula) ON DELETE CASCADE
+    foreign key (id_aula) references aula(id_aula) ON DELETE CASCADE
     -- foreign key (id_tipo_atividade) references tipo_atividade(id_tipo_atividade)
 );
     
@@ -179,10 +179,11 @@ create table forum_topico (
     id_forum int,
     id_usuario_criador int,
     titulo varchar(255) not null,
-    conteudo text,
+    conteudo varchar(255) not null,
     data_criacao datetime default current_timestamp,
     foreign key (id_forum) references forum(id_forum),
-    foreign key (id_usuario_criador) references usuario(id_usuario));
+    foreign key (id_usuario_criador) references usuario(id_usuario)
+);
     
 create table forum_topico_resposta (
 	id_forum_topico_resposta int auto_increment primary key,
@@ -191,14 +192,14 @@ create table forum_topico_resposta (
     conteudo text not null,
     data_criacao datetime default current_timestamp,
     foreign key (id_forum_topico) references forum_topico(id_forum_topico),
-    foreign key (id_usuario) references usuario(id_usuario));
-    
+    foreign key (id_usuario) references usuario(id_usuario)
+);
 
 -- CRIAÇÃO DE ÍNDICES
 
-CREATE INDEX idx_usuarios_nome_email_tipo ON usuarios (nome, email_tipo_usuario);
+CREATE INDEX idx_usuarios_nome_email_tipo ON usuario (nome, email, tipo_usuario);
 CREATE INDEX idx_cursos_titulo_descricao ON curso (titulo, descricao);
 CREATE INDEX idx_matricula_usuario_curso ON matricula (id_usuario, id_curso);
-CREATE INDEX idx_curso_categoria ON curso_categoria (id_categoria, id_categoria);
+CREATE INDEX idx_curso_categoria ON curso_categoria (id_categoria, id_curso);
 CREATE INDEX idx_certificado_nome_curso ON certificado (id_curso, id_usuario);
-CREATE INDEX idx_forums_curso_titulo_conteudo ON forum (id_curso, conteudo, titulo);
+CREATE INDEX idx_forums_topico_titulo_conteudo ON forum_topico (id_forum, conteudo, titulo);
