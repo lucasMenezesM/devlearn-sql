@@ -2,31 +2,22 @@ create database devlearn;
 
 use devlearn;
 
--- create table tipo_usuario (
--- 	id_tipo_usuario int auto_increment primary key,
---     tipo varchar(50) not null);
-
 create table usuario (
 	id_usuario int auto_increment primary key,
     nome varchar(100) not null,
     email varchar(100) unique not null,
     senha varchar(255) not null,
-    -- id_tipo_usuario int,
     tipo_usuario ENUM('Professor', 'Admin', 'Aluno'),
     data_criacao datetime default current_timestamp,
     ativo boolean default true
-    -- foreign key (id_tipo_usuario) references tipo_usuario(id_tipo_usuario)
 );
 
 create table curso (
 	id_curso int auto_increment primary key,
     titulo varchar(255) not null,
     descricao varchar(255),
-    -- id_usuario int,
     data_criacao datetime default current_timestamp,
-    publicado boolean default false,
-    inativo boolean default false
-    -- foreign key (id_usuario) references usuario(id_usuario)
+    publicado boolean default false
 );
     
 create table modulo (
@@ -34,7 +25,6 @@ create table modulo (
     id_curso int,
     titulo varchar(255) not null,
     descricao text,
-    -- ordem int not null,
     publicado boolean default false,
     foreign key (id_curso) references curso(id_curso) ON DELETE CASCADE
 );
@@ -42,24 +32,18 @@ create table modulo (
 create table aula (
 	id_aula int auto_increment primary key,
     id_modulo int,
-    id_curso int,
+    -- id_curso int,
     titulo varchar(255) not null,
     descricao text,
     url_video varchar(255),
-    -- ordem int not null,
     publicado boolean default false,
-    foreign key (id_modulo) references modulo(id_modulo) ON DELETE SET NULL,
-    foreign key (id_curso) references modulo(id_curso) ON DELETE CASCADE
+    foreign key (id_modulo) references modulo(id_modulo) ON DELETE CASCADE
+    -- foreign key (id_curso) references modulo(id_curso) ON DELETE CASCADE
 );
-
--- create table tipo_atividade (
--- 	id_tipo_atividade int auto_increment primary key,
---     tipo varchar(255) not null);
 
 create table atividade (
 	id_atividade int auto_increment primary key,
     id_modulo int, 
-    -- id_tipo_atividade int,
     id_aula int,
     titulo varchar(255) not null, 
     descricao text,
@@ -68,29 +52,16 @@ create table atividade (
     tipo_atividade ENUM('Multipla escolha', 'Discursiva'),
     foreign key (id_modulo) references modulo(id_modulo) ON DELETE SET NULL,
     foreign key (id_aula) references aula(id_aula) ON DELETE CASCADE
-    -- foreign key (id_tipo_atividade) references tipo_atividade(id_tipo_atividade)
 );
-    
--- create table pergunta (
--- 	id_pergunta int auto_increment primary key,
---     id_atividade int,
---     texto text not null,
---     -- resposta_correta varchar(255) not null,
---     publicado boolean default true,
---     foreign key (id_atividade) references atividade(id_atividade)
--- );
     
 create table resposta_atividade (
 	id_resposta_atividade int auto_increment primary key,
     id_atividade int,
     id_usuario int, 
-    -- id_pergunta int,
     resposta boolean default false,
-    -- nota decimal(5, 2),
     data_envio datetime default current_timestamp,
     foreign key (id_atividade) references atividade(id_atividade) ON DELETE CASCADE,
     foreign key (id_usuario) references usuario(id_usuario) ON DELETE CASCADE
-    -- foreign key (id_pergunta) references pergunta(id_pergunta)
 );
     
 create table progresso_curso (
@@ -98,33 +69,20 @@ create table progresso_curso (
     porcentagem float default 0,
     id_usuario int,
     id_curso int,
-    -- descricao varchar(50) not null);
     foreign key (id_usuario) references usuario(id_usuario) ON DELETE CASCADE,
-    foreign key (id_curso) references aula(id_curso) ON DELETE CASCADE
+    foreign key (id_curso) references curso(id_curso) ON DELETE CASCADE
 );
     
 create table progresso_aula (
 	id_progresso_aula int auto_increment primary key,
     id_aula int, 
     id_usuario int, 
-    -- id_progresso int,
     tempo_assistido decimal(5, 2),
     concluida boolean default false,
     data_conclusao datetime,
     foreign key (id_aula) references aula(id_aula),
     foreign key (id_usuario) references usuario(id_usuario)
-    -- foreign key (id_progresso) references progresso(id_progresso)
 );
-
--- create table progresso_atividade (
--- 	id_progresso_atividade int auto_increment primary key,
---     id_atividade int,
---     id_usuario int,
---     id_progresso int,
---     data_conclusao datetime,
---     foreign key (id_atividade) references atividade(id_atividade),
---     foreign key (id_usuario) references usuario(id_usuario),
---     foreign key (id_progresso) references progresso(id_progresso));
 
 create table certificado (
 	id_certificado int auto_increment primary key,
@@ -139,7 +97,7 @@ create table avaliacao (
 	id_avaliacao int auto_increment primary key,
     id_curso int, 
     id_usuario int, 
-    nota int check(nota >=1 and nota <=1),
+    nota int check(nota >=1 and nota <=10),
     comentario text,
     data_avaliacao datetime default current_timestamp,
     foreign key (id_curso) references curso(id_curso),
@@ -198,8 +156,31 @@ create table forum_topico_resposta (
 -- CRIAÇÃO DE ÍNDICES
 
 CREATE INDEX idx_usuarios_nome_email_tipo ON usuario (nome, email, tipo_usuario);
+CREATE INDEX idx_usuario_email ON usuario (email);
 CREATE INDEX idx_cursos_titulo_descricao ON curso (titulo, descricao);
+
 CREATE INDEX idx_matricula_usuario_curso ON matricula (id_usuario, id_curso);
+
 CREATE INDEX idx_curso_categoria ON curso_categoria (id_categoria, id_curso);
-CREATE INDEX idx_certificado_nome_curso ON certificado (id_curso, id_usuario);
+
 CREATE INDEX idx_forums_topico_titulo_conteudo ON forum_topico (id_forum, conteudo, titulo);
+
+CREATE INDEX idx_modulo_id_curso ON modulo (id_curso);
+CREATE INDEX idx_aula_id_modulo ON aula (id_modulo);
+CREATE INDEX idx_aula_publicado ON aula (publicado);
+CREATE INDEX idx_atividade_id_modulo ON atividade (id_modulo);
+CREATE INDEX idx_atividade_id_aula ON atividade (id_aula);
+
+CREATE INDEX idx_resposta_atividade_id_atividade ON resposta_atividade (id_atividade);
+CREATE INDEX idx_resposta_atividade_id_usuario ON resposta_atividade (id_usuario);
+
+CREATE INDEX idx_progresso_curso_id_usuario_id_curso ON progresso_curso (id_usuario, id_curso);
+CREATE INDEX idx_progresso_aula_id_usuario_id_aula ON progresso_aula (id_usuario, id_aula);
+
+CREATE INDEX idx_certificado_usuario_curso ON certificado (id_curso, id_usuario);
+CREATE INDEX idx_certificado_id_usuario ON certificado (id_usuario);
+CREATE INDEX idx_certificado_id_curso ON certificado (id_curso);
+CREATE INDEX idx_certificado_codigo ON certificado (codigo_certificado);
+
+CREATE INDEX idx_avaliacao_id_curso ON avaliacao (id_curso);
+CREATE INDEX idx_avaliacao_id_usuario ON avaliacao (id_usuario);
