@@ -1,6 +1,6 @@
-create database devlearn;
+create database devlearn_db;
 
-use devlearn;
+use devlearn_db;
 
 create table usuario (
 	id_usuario int auto_increment primary key,
