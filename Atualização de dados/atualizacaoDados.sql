@@ -15,3 +15,17 @@ SET m.publicado = CASE
     WHEN (SELECT COUNT(*) FROM aula a WHERE a.id_modulo = m.id_modulo AND a.publicado = true) > 3 THEN true
     ELSE false
 END;
+
+--Progresso aula: Atualiza a coluna concluida na tabela progresso_aula, definindo-a como verdadeira (true) ou falsa (false) com base na nota do aluno na tabela avaliacao
+
+UPDATE progresso_aula pa
+JOIN aula a ON pa.id_aula = a.id_aula
+JOIN curso c ON a.id_curso = c.id_curso
+SET pa.concluida = CASE 
+    WHEN (SELECT ac.nota 
+          FROM avaliacao ac 
+          WHERE ac.id_curso = c.id_curso 
+            AND ac.id_usuario = pa.id_usuario) >= 60 
+    THEN true 
+    ELSE false 
+END;
